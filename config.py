@@ -20,3 +20,10 @@ MAX_RECENT_MESSAGES = 40
 SUMMARIZE_BATCH_SIZE = 30
 
 DB_PATH = Path(__file__).parent / "sessions.db"
+
+THREAD_NAME_LIMIT = 100
+
+# Comma-separated channel names the bot is allowed to respond in.
+# If empty, the bot responds in all channels.
+_bot_channels = os.getenv("BOT_CHANNELS", "")
+BOT_CHANNELS = [ch.strip() for ch in _bot_channels.split(",") if ch.strip()]

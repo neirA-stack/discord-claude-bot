@@ -9,6 +9,20 @@ A Discord bot powered by Claude (Anthropic API). Mention the bot to start a thre
 - Conversation memory with summarize-and-trim (SQLite-backed)
 - Splits long responses across multiple messages
 
+## Project Structure
+
+```
+├── bot.py              # Discord client, event handlers
+├── claude_client.py    # Anthropic SDK wrapper, summarization
+├── config.py           # Environment + constants
+├── db.py               # SQLite database layer
+├── utils.py            # Logging setup, message splitting
+├── docs/
+│   └── DEPLOY.md       # Oracle Cloud deployment guide
+└── deploy/
+    └── discord-claude-bot.service
+```
+
 ## Quick Start
 
 1. **Clone and set up a virtual environment:**
@@ -53,3 +67,8 @@ Edit `config.py` to adjust:
 | `CLAUDE_MAX_TOKENS` | `4096` | Max tokens per response |
 | `MAX_RECENT_MESSAGES` | `40` | Threshold to trigger summarization |
 | `SUMMARIZE_BATCH_SIZE` | `30` | Number of oldest messages to summarize |
+| `BOT_CHANNELS` | *(empty)* | Comma-separated channel names (e.g. `ai-chat,ai-help`). Empty = all channels. Missing channels are created automatically. |
+
+## Deployment
+
+See [docs/DEPLOY.md](docs/DEPLOY.md) for deploying to Oracle Cloud (Always Free tier).

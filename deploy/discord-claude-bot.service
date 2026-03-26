@@ -1,0 +1,22 @@
+[Unit]
+Description=Discord Claude Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/discord-claude-bot
+EnvironmentFile=/home/ubuntu/discord-claude-bot/.env
+ExecStart=/home/ubuntu/discord-claude-bot/.venv/bin/python bot.py
+Restart=on-failure
+RestartSec=10
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/discord-claude-bot
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

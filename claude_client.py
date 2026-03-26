@@ -1,3 +1,5 @@
+import logging
+
 import anthropic
 import db
 from config import (
@@ -8,6 +10,8 @@ from config import (
     SUMMARIZE_BATCH_SIZE,
     SYSTEM_PROMPT,
 )
+
+logger = logging.getLogger(__name__)
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
@@ -37,12 +41,15 @@ def _summarize(thread_id: str):
     )
     summary = response.content[0].text
     db.update_summary_and_trim(thread_id, summary, SUMMARIZE_BATCH_SIZE)
+    logger.info("Summarized and trimmed %d messages for thread %s", SUMMARIZE_BATCH_SIZE, thread_id)
 
 
 def get_response(thread_id: str, user_message: str) -> str:
     db.add_message(thread_id, "user", user_message)
 
-    if db.get_message_count(thread_id) > MAX_RECENT_MESSAGES:
+    msg_count = db.get_message_count(thread_id)
+    if msg_count > MAX_RECENT_MESSAGES:
+        logger.info("Thread %s has %d messages, triggering summarization", thread_id, msg_count)
         _summarize(thread_id)
 
     messages = []
