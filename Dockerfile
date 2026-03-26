@@ -5,6 +5,6 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY bot.py claude_client.py config.py db.py utils.py ./
+COPY bot.py channel_history.py claude_client.py config.py db.py utils.py ./
 
 CMD ["python", "bot.py"]
