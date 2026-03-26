@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 
 client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
+WEB_TOOLS = [
+    {"type": "web_search_20260209", "name": "web_search"},
+    {"type": "web_fetch_20260209", "name": "web_fetch"},
+]
+
 SUMMARIZE_PROMPT = (
     "Summarize the following conversation concisely, preserving key facts, "
     "decisions, and context that would be needed to continue the conversation. "
@@ -71,8 +76,27 @@ def get_response(thread_id: str, user_message: str) -> str:
         max_tokens=CLAUDE_MAX_TOKENS,
         system=SYSTEM_PROMPT,
         messages=messages,
+        tools=WEB_TOOLS,
     )
-    reply = response.content[0].text
+
+    # Handle pause_turn: server-side tools may need continuation
+    max_continuations = 5
+    while response.stop_reason == "pause_turn" and max_continuations > 0:
+        logger.info("Web search in progress for thread %s, continuing...", thread_id)
+        response = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=CLAUDE_MAX_TOKENS,
+            system=SYSTEM_PROMPT,
+            messages=[
+                *messages,
+                {"role": "assistant", "content": response.content},
+            ],
+            tools=WEB_TOOLS,
+        )
+        max_continuations -= 1
+
+    # Extract text from response (may contain mixed content blocks)
+    reply = "\n".join(block.text for block in response.content if block.type == "text")
 
     db.add_message(thread_id, "assistant", reply)
     return reply
